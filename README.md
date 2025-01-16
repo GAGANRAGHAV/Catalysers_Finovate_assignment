@@ -9,6 +9,16 @@ This project is a Task Management System designed for scalability and flexibilit
 
 ---
 
+## Fetures implemented
+| Evaluation Criteria     |  
+|-------------------------|--------------------|
+| Frontend                | ✅                |
+| Backend                 | ✅                |
+| Payment Integration     | ✅                |
+| Kafka Implementation    | ❌                |
+| Docker & Kubernetes     | containerized      |
+| Documentation           | ✅                |
+
 ## Features
 
 ### 1. User Authentication and Role Management
