@@ -84,7 +84,49 @@ This project is a Task Management System designed for scalability and flexibilit
 - Node.js, Docker, Kubernetes, and PostgreSQL installed.
 - Stripe/Razorpay API keys.
 
-### Steps to Run Locally
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repo/task-management-system.git
+
+## Installation
+
+To get started with the Project, follow these steps:
+
+1. Clone the repository to your local machine :
+
+```bash
+git clone [https://github.com/aitoss/Anubhav-frontend-23.git](https://github.com/GAGANRAGHAV/Catalysers_Finovate_assignment/)
+```
+
+2. Navigate to the project  frontend directory:
+
+```bash
+cd client3
+```
+
+3. Install project dependencies:
+
+```bash
+npm install
+```
+
+4. Start the development server:
+
+```bash
+npm run dev
+```
+
+5. Navigate to the project backend directory:
+
+```bash
+cd server
+```
+
+3. Install project dependencies:
+
+```bash
+npm install
+```
+
+4. Start the development server:
+
+```bash
+node server.js
+```
