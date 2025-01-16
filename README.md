@@ -92,7 +92,7 @@ To get started with the Project, follow these steps:
 1. Clone the repository to your local machine :
 
 ```bash
-git clone [https://github.com/aitoss/Anubhav-frontend-23.git](https://github.com/GAGANRAGHAV/Catalysers_Finovate_assignment/)
+git clone https://github.com/GAGANRAGHAV/Catalysers_Finovate_assignment
 ```
 
 2. Navigate to the project  frontend directory:
