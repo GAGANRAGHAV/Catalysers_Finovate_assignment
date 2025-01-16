@@ -2,7 +2,7 @@
 
 This project is a Task Management System designed for scalability and flexibility, incorporating payment integration for premium features. Users can register, create tasks, assign tasks to team members, track task status, and manage subscriptions. It is containerized and deployed using Docker and Kubernetes.
 
-## Drive PRoject Video Link
+## Drive Project Video Link
 https://drive.google.com/file/d/1Hvyi5W_kMWN5tM60zwKO6qAe16H3NEOm/view?usp=sharing
 
 ## Architecture
