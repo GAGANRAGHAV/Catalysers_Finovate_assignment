@@ -27,8 +27,8 @@ exports.checkout = async (req, res) => {
       shipping_address_collection: {
         allowed_countries: ["IN"], // Restrict to India or add more countries as needed
       },
-      success_url: "http://localhost:3000/dashboard",
-      cancel_url: "http://localhost:3000/cancel",
+      success_url: "https://catalysers-finovate-assignment.vercel.app/dashboard",
+      cancel_url: "https://catalysers-finovate-assignment.vercel.app/dashboard",
     });
     res.json({ url: session.url });
   } catch (error) {
