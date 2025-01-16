@@ -24,15 +24,27 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
+interface DecodedToken {
+  id: string;
+}
+
+// Define the type for user data
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+
 export default function CreateTaskForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]); // Explicitly define type
   const [isPremium, setIsPremium] = useState(false);
   const token = localStorage.getItem("authToken");
-  const decodedToken = jwtDecode(token);
-  const userId = decodedToken.id; // Extracting userId from the token
+  const decodedToken: DecodedToken | null = token ? jwtDecode<DecodedToken>(token) : null; // Handle null token
+  const userId = decodedToken?.id || ""; // Use optional chaining
 
   const router = useRouter();
 
@@ -41,7 +53,7 @@ export default function CreateTaskForm() {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/auth/users"
+          "https://catalysers-finovate-assignment.onrender.com/api/auth/users"
         );
         setUsers(response.data.users);
       } catch (err) {
@@ -60,7 +72,7 @@ export default function CreateTaskForm() {
       }
   
       try {
-        const response = await axios.post("http://localhost:5000/api/tasks/getusertype", {
+        const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/tasks/getusertype", {
           userId,
         });
   
@@ -94,11 +106,11 @@ export default function CreateTaskForm() {
         title,
         description,
         assigned_to: assignedTo,
-        created_by: jwtDecode(token).id,
+        created_by: decodedToken?.id,
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/tasks",
+        "https://catalysers-finovate-assignment.onrender.com/api/tasks",
         payload
       );
 
@@ -116,7 +128,7 @@ export default function CreateTaskForm() {
   const handlecheckout = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/tasks/checkout",
+        "https://catalysers-finovate-assignment.onrender.com/api/tasks/checkout",
         {
           items: [
             {

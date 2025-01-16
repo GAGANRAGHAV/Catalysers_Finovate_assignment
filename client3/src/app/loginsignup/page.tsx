@@ -28,7 +28,7 @@ export default function AuthPage() {
     try {
       const payload = { name, email, password, role };
       console.log(payload);
-      const response = await axios.post("http://localhost:5000/api/auth/register", payload);
+      const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/auth/register", payload);
       console.log("User registered:", response.data);
       alert("Registration successful. Please log in.");
       setIsLoginForm(true);
@@ -43,7 +43,7 @@ export default function AuthPage() {
     try {
       console.log(payload);
 
-      const response = await axios.post("http://localhost:5000/api/auth/login", payload);
+      const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/auth/login", payload);
       console.log("Login successful:", response.data);
       localStorage.setItem("authToken", response.data.token);
       router.push("/dashboard"); // Redirect to dashboard

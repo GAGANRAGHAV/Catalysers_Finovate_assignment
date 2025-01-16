@@ -8,8 +8,15 @@ interface Task {
   title: string;
   description: string;
   assigned_to: number; // Assuming `assigned_to` is a user ID
-  createdBy: string; // Username of the user who created the task
+  createdby: string; // Username of the user who created the task
   status: string; // Task status (e.g., "pending", "completed")
+}
+
+
+interface CustomJwtPayload {
+  id: string;
+  name?: string;
+  email?: string;
 }
 
 export default function UserTasks() {
@@ -17,12 +24,28 @@ export default function UserTasks() {
   const [loading, setLoading] = useState<boolean>(true);
   const token = localStorage.getItem("authToken");
 
+  let decodedToken: CustomJwtPayload | null = null;
+
+  if (token) {
+    try {
+      decodedToken = jwtDecode<CustomJwtPayload>(token);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  } else {
+    console.error("No token found in localStorage.");
+  }
   // Fetch tasks for the logged-in user
   const fetchTasks = async () => {
     try {
-      const userId = jwtDecode(token).id; // Ensure it's a string if needed
+      if (!decodedToken || !decodedToken.id) {
+        console.error("Decoded token or user ID is missing.");
+        setLoading(false);
+        return;
+      }
+      const userId = decodedToken.id; // Safely access the `id`
       const response = await axios.get(
-        `http://localhost:5000/api/tasks?userId=${userId}`
+        `https://catalysers-finovate-assignment.onrender.com/api/tasks?userId=${userId}`
       );
       setTasks(response.data.tasks);
       setLoading(false);
@@ -35,7 +58,7 @@ export default function UserTasks() {
   // Update the task's status
   const updateStatus = async (taskId: string, status: string) => {
     try {
-      const response = await axios.put("http://localhost:5000/api/tasks", {
+      const response = await axios.put("https://catalysers-finovate-assignment.onrender.com/api/tasks", {
         taskId,
         status,
       });

@@ -6,8 +6,8 @@ interface Task {
   id: string;
   title: string;
   description: string;
-  assignedTo: string | null; // Name of the user the task is assigned to (can be null)
-  createdBy: string; // Name of the user who created the task
+  assignedto: string | null; // Name of the user the task is assigned to (can be null)
+  createdby: string; // Name of the user who created the task
   status: string; // Task status (e.g., "pending", "completed")
 }
 
@@ -18,7 +18,7 @@ export default function ManagerTasks() {
   // Fetch all tasks for the manager
   const fetchTasks = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/tasks/manager");
+      const response = await axios.get("https://catalysers-finovate-assignment.onrender.com/api/tasks/manager");
       setTasks(response.data.tasks);
       setLoading(false);
     } catch (error) {

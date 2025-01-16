@@ -7,6 +7,14 @@ import ManagerPage from "@/app/manager/page";
 import UserPage from "@/app/user/page";
 import { Button } from "@/components/ui/button";
 
+interface CustomJwtPayload {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+
 export default function RoleBasedPage() {
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,8 +29,9 @@ export default function RoleBasedPage() {
         setLoading(false);
         return;
       }
+      const decodedToken = jwtDecode<CustomJwtPayload>(token);
 
-      const { role } = jwtDecode(token);
+      const { role } = decodedToken;
       console.log(role);
       if (!["Admin", "Manager", "User"].includes(role)) {
         setError("Invalid role in token.");
