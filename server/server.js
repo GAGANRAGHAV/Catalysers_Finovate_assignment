@@ -11,7 +11,7 @@ const app = express();
 
 // Set up CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your frontend's origin
+  origin: 'https://catalysers-finovate-assignment.vercel.app', // Replace with your frontend's origin
   credentials: true, // Allow cookies and other credentials
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
