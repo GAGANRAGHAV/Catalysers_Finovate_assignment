@@ -8,15 +8,15 @@ This project is a Task Management System designed for scalability and flexibilit
 ![image](https://github.com/user-attachments/assets/e169b169-04d2-447d-bf94-6ebf31d1e289)
 
 ---
+## Features Implemented
 
-## Fetures implemented
-| Evaluation Criteria     |  
-|-------------------------|--------------------|
+| Evaluation Criteria     | Status            |
+|-------------------------|-------------------|
 | Frontend                | ✅                |
 | Backend                 | ✅                |
 | Payment Integration     | ✅                |
 | Kafka Implementation    | ❌                |
-| Docker & Kubernetes     | containerized      |
+| Docker & Kubernetes     | Containerized     |
 | Documentation           | ✅                |
 
 ## Features
