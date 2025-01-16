@@ -2,7 +2,11 @@
 
 This project is a Task Management System designed for scalability and flexibility, incorporating payment integration for premium features. Users can register, create tasks, assign tasks to team members, track task status, and manage subscriptions. It is containerized and deployed using Docker and Kubernetes.
 
-![image](https://github.com/user-attachments/assets/7d407b9f-0565-48d0-93d5-5bc3118e4197)
+
+## Architecture
+
+![image](https://github.com/user-attachments/assets/e169b169-04d2-447d-bf94-6ebf31d1e289)
+
 ---
 
 ## Features
