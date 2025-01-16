@@ -136,14 +136,24 @@ npm run dev
 cd server
 ```
 
-3. Install project dependencies:
+6. Install project dependencies:
 
 ```bash
 npm install
 ```
 
-4. Start the development server:
+7. Start the development server:
 
 ```bash
 node server.js
 ```
+
+
+8. docker Command:
+
+```bash
+docker-compose build
+docker-compose up
+```
+
+
