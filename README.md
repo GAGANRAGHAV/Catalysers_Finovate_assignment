@@ -26,17 +26,17 @@ This project is a Task Management System designed for scalability and flexibilit
 - **Kafka** handles task updates and notifications.
 
 ---
-
 ## Tech Stack
 
-### Component | Technology
-| **Frontend**         | [Next.js](https://nextjs.org/)        |
-| **Backend**          | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/) |
-| **Database**         | [PostgreSQL](https://www.postgresql.org/) |
-| **Messaging**        | [Kafka](https://kafka.apache.org/) |
-| **Payment Gateway**  | [Stripe](https://stripe.com/) / [Razorpay](https://razorpay.com/) |
-| **Containerization** | [Docker](https://www.docker.com/) |
-| **Orchestration**    | [Kubernetes](https://kubernetes.io/) |
+| **Component**         | **Technology**                                                                 |
+|------------------------|-------------------------------------------------------------------------------|
+| **Frontend**          | [Next.js](https://nextjs.org/)                                                |
+| **Backend**           | [Node.js](https://nodejs.org/) + [Express.js](https://expressjs.com/)         |
+| **Database**          | [PostgreSQL](https://www.postgresql.org/)                                     |
+| **Messaging**         | [Kafka](https://kafka.apache.org/)                                            |
+| **Payment Gateway**   | [Stripe](https://stripe.com/) / [Razorpay](https://razorpay.com/)             |
+| **Containerization**  | [Docker](https://www.docker.com/)                                             |
+| **Orchestration**     | [Kubernetes](https://kubernetes.io/)                                          |
 
 ---
 
