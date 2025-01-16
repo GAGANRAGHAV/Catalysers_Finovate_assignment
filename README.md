@@ -2,7 +2,7 @@
 
 This project is a Task Management System designed for scalability and flexibility, incorporating payment integration for premium features. Users can register, create tasks, assign tasks to team members, track task status, and manage subscriptions. It is containerized and deployed using Docker and Kubernetes.
 
-[View on Eraser![](https://app.eraser.io/workspace/fuqIVAnTywlqKaNIe4Jw/preview?elements=6vqq5Wj7dX23qS9HyrRt6Q&type=embed)](https://app.eraser.io/workspace/fuqIVAnTywlqKaNIe4Jw?elements=6vqq5Wj7dX23qS9HyrRt6Q)
+![image](https://github.com/user-attachments/assets/7d407b9f-0565-48d0-93d5-5bc3118e4197)
 ---
 
 ## Features
