@@ -190,3 +190,24 @@ exports.updateTaskStatus = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getUserTypeDetails = async (req, res) => {
+  try {
+    const { userId } = req.body; // Extracting userId from the request body
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const result = await pool.query('SELECT usertype FROM users WHERE id = $1', [userId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ userType: result.rows[0].usertype });
+  } catch (error) {
+    console.error('Error fetching user type details:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

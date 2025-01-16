@@ -31,6 +31,8 @@ export default function CreateTaskForm() {
   const [users, setUsers] = useState([]);
   const [isPremium, setIsPremium] = useState(false);
   const token = localStorage.getItem("authToken");
+  const decodedToken = jwtDecode(token);
+  const userId = decodedToken.id; // Extracting userId from the token
 
   const router = useRouter();
 
@@ -49,14 +51,37 @@ export default function CreateTaskForm() {
 
     fetchUsers();
   }, []);
-  const { usertype } = jwtDecode(token);
-  console.log(usertype);
 
   useEffect(() => {
-    if (usertype === "premium") {
-      setIsPremium(true);
-    }
-  }, [usertype]);
+    const fetchUserType = async () => {
+      if (!userId) {
+        console.error("User ID is not available.");
+        return;
+      }
+  
+      try {
+        const response = await axios.post("http://localhost:5000/api/tasks/getusertype", {
+          userId,
+        });
+  
+        if (response.status === 200) {
+          const { userType } = response.data;
+          if (userType === "premium") {
+            setIsPremium(true);
+          } else {
+            setIsPremium(false);
+          }
+        } else {
+          console.error("Error:", response.data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching user type:", error);
+      }
+    };
+  
+    fetchUserType();
+  }, [userId]);
+  
 
   const handleCreateTask = async () => {
     try {

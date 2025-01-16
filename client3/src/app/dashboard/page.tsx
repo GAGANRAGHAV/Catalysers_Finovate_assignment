@@ -1,14 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import {jwtDecode} from "jwt-decode";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import AdminPage from "@/app/admin/page";
 import ManagerPage from "@/app/manager/page";
 import UserPage from "@/app/user/page";
+import { Button } from "@/components/ui/button";
 
 export default function RoleBasedPage() {
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -35,6 +38,11 @@ export default function RoleBasedPage() {
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    router.push("/loginsignup");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -53,9 +61,23 @@ export default function RoleBasedPage() {
 
   return (
     <div className="min-h-screen">
-      {role === "Admin" && <AdminPage />}
-      {role === "Manager" && <ManagerPage />}
-      {role === 'User' && <UserPage />}
+      <nav className="bg-gray-800 text-white p-4">
+        <div className="flex justify-between">
+          <div className="text-lg">Task Management App.</div>
+          <div>
+            <Button
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        </div>
+      </nav>
+      <div className="mt-4">
+        {role === "Admin" && <AdminPage />}
+        {role === "Manager" && <ManagerPage />}
+        {role === "User" && <UserPage />}
+      </div>
     </div>
   );
 }

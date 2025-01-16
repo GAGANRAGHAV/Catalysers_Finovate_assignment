@@ -22,7 +22,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("User"); // Default role
   const router = useRouter();
-  const token = localStorage.getItem('authToken');
+  // const token = localStorage.getItem('authToken');
 
   const handleRegister = async () => {
     try {
@@ -53,16 +53,16 @@ export default function AuthPage() {
     }
   };
 
-  if (token) {
-    const { role } = jwtDecode(token); // Use token safely here
-    // Perform role-specific actions
-    console.log(role);
+  // if (token) {
+  //   const { role } = jwtDecode(token); // Use token safely here
+  //   // Perform role-specific actions
+  //   console.log(role);
 
-    const {id} = jwtDecode(token);
-    console.log(id);  
-  } else {
-    console.error('Token not found in localStorage');
-  }
+  //   const {id} = jwtDecode(token);
+  //   console.log(id);  
+  // } else {
+  //   console.error('Token not found in localStorage');
+  // }
   return (
     <div className="flex justify-center items-center h-screen">
       <Card className="w-full max-w-md">
