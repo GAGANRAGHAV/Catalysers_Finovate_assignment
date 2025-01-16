@@ -1,0 +1,38 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Database files
+*.sqlite
+*.db
+
+# Dependencies directory for packages like yarn
+yarn.lock
+package-lock.json
+
+# Debug files
+.vscode/
+.idea/
+
+# Build output
+/dist/
+/build/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.swp
+*.swo
