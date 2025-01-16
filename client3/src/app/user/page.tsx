@@ -1,17 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 
 interface Task {
   id: string;
   title: string;
   description: string;
-  assigned_to: number; // Assuming `assigned_to` is a user ID
-  createdby: string; // Username of the user who created the task
-  status: string; // Task status (e.g., "pending", "completed")
+  assigned_to: number;
+  createdby: string;
+  status: string;
 }
-
 
 interface CustomJwtPayload {
   id: string;
@@ -22,19 +21,23 @@ interface CustomJwtPayload {
 export default function UserTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const token = localStorage.getItem("authToken");
+  const [token, setToken] = useState<string | null>(null);
+  const [decodedToken, setDecodedToken] = useState<CustomJwtPayload | null>(null);
 
-  let decodedToken: CustomJwtPayload | null = null;
-
-  if (token) {
-    try {
-      decodedToken = jwtDecode<CustomJwtPayload>(token);
-    } catch (error) {
-      console.error("Error decoding token:", error);
+  // Load the token and decode it on the client side
+  useEffect(() => {
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken) {
+      setToken(storedToken);
+      try {
+        const decoded = jwtDecode<CustomJwtPayload>(storedToken);
+        setDecodedToken(decoded);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
     }
-  } else {
-    console.error("No token found in localStorage.");
-  }
+  }, []);
+
   // Fetch tasks for the logged-in user
   const fetchTasks = async () => {
     try {
@@ -43,7 +46,7 @@ export default function UserTasks() {
         setLoading(false);
         return;
       }
-      const userId = decodedToken.id; // Safely access the `id`
+      const userId = decodedToken.id;
       const response = await axios.get(
         `https://catalysers-finovate-assignment.onrender.com/api/tasks?userId=${userId}`
       );
@@ -68,15 +71,16 @@ export default function UserTasks() {
         )
       );
       alert(`Task status updated to "${status}" successfully!`);
-
     } catch (error) {
       console.error("Error updating task status:", error);
     }
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (decodedToken) {
+      fetchTasks();
+    }
+  }, [decodedToken]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">

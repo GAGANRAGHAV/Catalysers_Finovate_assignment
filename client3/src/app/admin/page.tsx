@@ -35,17 +35,13 @@ interface User {
   email: string;
 }
 
-
 export default function CreateTaskForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [users, setUsers] = useState<User[]>([]); // Explicitly define type
   const [isPremium, setIsPremium] = useState(false);
-  const token = localStorage.getItem("authToken");
-  const decodedToken: DecodedToken | null = token ? jwtDecode<DecodedToken>(token) : null; // Handle null token
-  const userId = decodedToken?.id || ""; // Use optional chaining
-
+  const [userId, setUserId] = useState<string>(""); // State to hold userId
   const router = useRouter();
 
   // Fetch all users for the "assigned_to" dropdown
@@ -64,18 +60,27 @@ export default function CreateTaskForm() {
     fetchUsers();
   }, []);
 
+  // Fetch the token and decode it only on the client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("authToken");
+      const decodedToken: DecodedToken | null = token ? jwtDecode<DecodedToken>(token) : null;
+      setUserId(decodedToken?.id || "");
+    }
+  }, []);
+
   useEffect(() => {
     const fetchUserType = async () => {
       if (!userId) {
         console.error("User ID is not available.");
         return;
       }
-  
+
       try {
         const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/tasks/getusertype", {
           userId,
         });
-  
+
         if (response.status === 200) {
           const { userType } = response.data;
           if (userType === "premium") {
@@ -90,10 +95,9 @@ export default function CreateTaskForm() {
         console.error("Error fetching user type:", error);
       }
     };
-  
+
     fetchUserType();
   }, [userId]);
-  
 
   const handleCreateTask = async () => {
     try {
@@ -106,7 +110,7 @@ export default function CreateTaskForm() {
         title,
         description,
         assigned_to: assignedTo,
-        created_by: decodedToken?.id,
+        created_by: userId,
       };
 
       const response = await axios.post(
