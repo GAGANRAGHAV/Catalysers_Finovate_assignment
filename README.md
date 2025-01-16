@@ -2,12 +2,24 @@
 
 This project is a Task Management System designed for scalability and flexibility, incorporating payment integration for premium features. Users can register, create tasks, assign tasks to team members, track task status, and manage subscriptions. It is containerized and deployed using Docker and Kubernetes.
 
+## Drive Project Video Link
+https://drive.google.com/file/d/1Hvyi5W_kMWN5tM60zwKO6qAe16H3NEOm/view?usp=sharing
 
 ## Architecture
 
 ![image](https://github.com/user-attachments/assets/e169b169-04d2-447d-bf94-6ebf31d1e289)
 
 ---
+## Features Implemented
+
+| Evaluation Criteria     | Status            |
+|-------------------------|-------------------|
+| Frontend                | ✅                |
+| Backend                 | ✅                |
+| Payment Integration     | ✅                |
+| Kafka Implementation    | ❌                |
+| Docker & Kubernetes     | Containerized     |
+| Documentation           | ✅                |
 
 ## Features
 
@@ -124,14 +136,24 @@ npm run dev
 cd server
 ```
 
-3. Install project dependencies:
+6. Install project dependencies:
 
 ```bash
 npm install
 ```
 
-4. Start the development server:
+7. Start the development server:
 
 ```bash
 node server.js
 ```
+
+
+8. docker Command:
+
+```bash
+docker-compose build
+docker-compose up
+```
+
+
