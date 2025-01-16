@@ -1,4 +1,4 @@
-let {pool: pool} = require('../db');
+const pool = require('../db.js');
 const Stripe = require("stripe");
 
 
