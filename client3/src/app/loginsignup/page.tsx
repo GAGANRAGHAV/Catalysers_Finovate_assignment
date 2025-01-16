@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import {jwtDecode} from 'jwt-decode';
 
 export default function AuthPage() {
   const [isLoginForm, setIsLoginForm] = useState(true);
@@ -21,48 +20,49 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("User"); // Default role
+  const [loading, setLoading] = useState(false); // Loading state
   const router = useRouter();
-  // const token = localStorage.getItem('authToken');
 
   const handleRegister = async () => {
+    setLoading(true); // Start loader
     try {
       const payload = { name, email, password, role };
       console.log(payload);
-      const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/auth/register", payload);
+      const response = await axios.post(
+        "https://catalysers-finovate-assignment.onrender.com/api/auth/register",
+        payload
+      );
       console.log("User registered:", response.data);
       alert("Registration successful. Please log in.");
       setIsLoginForm(true);
     } catch (err) {
       console.error("Error registering user:", err);
       alert("Registration failed.");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
   const handleLogin = async () => {
+    setLoading(true); // Start loader
     const payload = { email, password };
     try {
       console.log(payload);
-
-      const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/auth/login", payload);
+      const response = await axios.post(
+        "https://catalysers-finovate-assignment.onrender.com/api/auth/login",
+        payload
+      );
       console.log("Login successful:", response.data);
       localStorage.setItem("authToken", response.data.token);
       router.push("/dashboard"); // Redirect to dashboard
     } catch (err) {
       console.error("Error logging in:", err);
       alert("Login failed.");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
-  // if (token) {
-  //   const { role } = jwtDecode(token); // Use token safely here
-  //   // Perform role-specific actions
-  //   console.log(role);
-
-  //   const {id} = jwtDecode(token);
-  //   console.log(id);  
-  // } else {
-  //   console.error('Token not found in localStorage');
-  // }
   return (
     <div className="flex justify-center items-center h-screen">
       <Card className="w-full max-w-md">
@@ -91,8 +91,19 @@ export default function AuthPage() {
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <Button className="mt-4 w-full" onClick={handleLogin}>
-                Login
+              <Button
+                className="mt-4 w-full"
+                onClick={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2"></div>
+                    Loading...
+                  </span>
+                ) : (
+                  "Login"
+                )}
               </Button>
               <Button
                 variant="link"
@@ -136,8 +147,19 @@ export default function AuthPage() {
                 <option value="Admin">Admin</option>
                 <option value="Manager">Manager</option>
               </select>
-              <Button className="mt-4 w-full" onClick={handleRegister}>
-                Sign Up
+              <Button
+                className="mt-4 w-full"
+                onClick={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2"></div>
+                    Loading...
+                  </span>
+                ) : (
+                  "Sign Up"
+                )}
               </Button>
               <Button
                 variant="link"
