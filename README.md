@@ -17,7 +17,7 @@ https://drive.google.com/file/d/1Hvyi5W_kMWN5tM60zwKO6qAe16H3NEOm/view?usp=shari
 | Frontend                | ✅                |
 | Backend                 | ✅                |
 | Payment Integration     | ✅                |
-| Kafka Implementation    | ❌                |
+| Kafka Implementation    | ✅                |
 | Docker & Kubernetes     | Containerized     |
 | Documentation           | ✅                |
 
