@@ -6,6 +6,7 @@ import AdminPage from "@/app/admin/page";
 import ManagerPage from "@/app/manager/page";
 import UserPage from "@/app/user/page";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CustomJwtPayload {
   id: string;
@@ -13,7 +14,6 @@ interface CustomJwtPayload {
   email: string;
   role: string;
 }
-
 
 export default function RoleBasedPage() {
   const [role, setRole] = useState<string | null>(null);
@@ -23,16 +23,24 @@ export default function RoleBasedPage() {
 
   useEffect(() => {
     try {
-      const token = localStorage.getItem("authToken");
+      // Get token from cookie instead of localStorage
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+      };
+
+      const token = getCookie('authToken');
+      
       if (!token) {
         setError("Authentication token not found. Please log in.");
         setLoading(false);
         return;
       }
-      const decodedToken = jwtDecode<CustomJwtPayload>(token);
 
+      const decodedToken = jwtDecode<CustomJwtPayload>(token);
       const { role } = decodedToken;
-      console.log(role);
+
       if (!["Admin", "Manager", "User"].includes(role)) {
         setError("Invalid role in token.");
         setLoading(false);
@@ -48,8 +56,9 @@ export default function RoleBasedPage() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    router.push("/loginsignup");
+    // Remove cookie
+    document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    router.push('/loginsignup');
   };
 
   if (loading) {

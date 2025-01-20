@@ -22,14 +22,15 @@ export default function AuthPage() {
   const [role, setRole] = useState("User"); // Default role
   const [loading, setLoading] = useState(false); // Loading state
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const handleRegister = async () => {
-    setLoading(true); // Start loader
+    setLoading(true); // Start loading
     try {
       const payload = { name, email, password, role };
       console.log(payload);
       const response = await axios.post(
-        "https://catalysers-finovate-assignment.onrender.com/api/auth/register",
+        "http://localhost:5000/api/auth/register",
         payload
       );
       console.log("User registered:", response.data);
@@ -37,29 +38,30 @@ export default function AuthPage() {
       setIsLoginForm(true);
     } catch (err) {
       console.error("Error registering user:", err);
-      alert("Registration failed.");
+      setError("Registration failed. Please try again.");
     } finally {
-      setLoading(false); // Stop loader
+      setLoading(false); // Stop loading regardless of outcome
     }
   };
 
-  const handleLogin = async () => {
-    setLoading(true); // Start loader
-    const payload = { email, password };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true); // Start loading
     try {
-      console.log(payload);
-      const response = await axios.post(
-        "https://catalysers-finovate-assignment.onrender.com/api/auth/login",
-        payload
-      );
-      console.log("Login successful:", response.data);
-      localStorage.setItem("authToken", response.data.token);
-      router.push("/dashboard"); // Redirect to dashboard
-    } catch (err) {
-      console.error("Error logging in:", err);
-      alert("Login failed.");
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+      });
+
+      if (response.data.token) {
+        // Store token in cookie instead of localStorage
+        document.cookie = `authToken=${response.data.token}; path=/; max-age=86400`; // 24 hours
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      setError('Invalid credentials');
     } finally {
-      setLoading(false); // Stop loader
+      setLoading(false); // Stop loading regardless of outcome
     }
   };
 
@@ -75,6 +77,11 @@ export default function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-600 rounded">
+              {error}
+            </div>
+          )}
           {isLoginForm ? (
             <>
               <Label htmlFor="email">Email</Label>
@@ -83,6 +90,7 @@ export default function AuthPage() {
                 type="email"
                 placeholder="Enter your email"
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
               <Label htmlFor="password">Password</Label>
               <Input
@@ -90,6 +98,7 @@ export default function AuthPage() {
                 type="password"
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
               <Button
                 className="mt-4 w-full"
@@ -99,7 +108,7 @@ export default function AuthPage() {
                 {loading ? (
                   <span className="flex justify-center items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2"></div>
-                    Loading...
+                    Logging in...
                   </span>
                 ) : (
                   "Login"
@@ -109,6 +118,7 @@ export default function AuthPage() {
                 variant="link"
                 onClick={() => setIsLoginForm(false)}
                 className="mt-2"
+                disabled={loading}
               >
                 Create an account
               </Button>
@@ -121,6 +131,7 @@ export default function AuthPage() {
                 type="text"
                 placeholder="Enter your name"
                 onChange={(e) => setName(e.target.value)}
+                disabled={loading}
               />
               <Label htmlFor="email">Email</Label>
               <Input
@@ -128,6 +139,7 @@ export default function AuthPage() {
                 type="email"
                 placeholder="Enter your email"
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
               <Label htmlFor="password">Password</Label>
               <Input
@@ -135,6 +147,7 @@ export default function AuthPage() {
                 type="password"
                 placeholder="Enter your password"
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
               <Label htmlFor="role">Role</Label>
               <select
@@ -142,6 +155,7 @@ export default function AuthPage() {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 className="w-full p-2 border rounded"
+                disabled={loading}
               >
                 <option value="User">User</option>
                 <option value="Admin">Admin</option>
@@ -155,7 +169,7 @@ export default function AuthPage() {
                 {loading ? (
                   <span className="flex justify-center items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white mr-2"></div>
-                    Loading...
+                    Signing up...
                   </span>
                 ) : (
                   "Sign Up"
@@ -165,6 +179,7 @@ export default function AuthPage() {
                 variant="link"
                 onClick={() => setIsLoginForm(true)}
                 className="mt-2"
+                disabled={loading}
               >
                 Already have an account? Log in
               </Button>

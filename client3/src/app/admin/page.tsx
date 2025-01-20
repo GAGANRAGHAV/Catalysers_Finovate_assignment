@@ -23,8 +23,14 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DecodedToken {
+  id: string;
+}
+
+interface CustomJwtPayload {
+  role: string;
   id: string;
 }
 
@@ -35,21 +41,29 @@ interface User {
   email: string;
 }
 
+interface UserPlanInfo {
+  userType: string;
+  taskCount: number;
+  taskLimit: number;
+}
+
 export default function CreateTaskForm() {
+  const { user, loading } = useAuth('Admin');
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [users, setUsers] = useState<User[]>([]); // Explicitly define type
-  const [isPremium, setIsPremium] = useState(false);
   const [userId, setUserId] = useState<string>(""); // State to hold userId
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
+  const [planInfo, setPlanInfo] = useState<UserPlanInfo | null>(null);
 
   // Fetch all users for the "assigned_to" dropdown
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(
-          "https://catalysers-finovate-assignment.onrender.com/api/auth/users"
+          "http://localhost:5000/api/auth/users"
         );
         setUsers(response.data.users);
       } catch (err) {
@@ -60,49 +74,89 @@ export default function CreateTaskForm() {
     fetchUsers();
   }, []);
 
-  // Fetch the token and decode it only on the client side
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    try {
       const token = localStorage.getItem("authToken");
-      const decodedToken: DecodedToken | null = token ? jwtDecode<DecodedToken>(token) : null;
+      if (!token) {
+        router.push("/loginsignup");
+        return;
+      }
+      const decodedToken = jwtDecode<CustomJwtPayload>(token);
+      setRole(decodedToken.role);
+    } catch {
+      router.push("/loginsignup");
+    }
+  }, [router]);
+
+  // Update token retrieval to use cookies
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+    };
+
+    const token = getCookie('authToken');
+    if (token) {
+      const decodedToken: DecodedToken = jwtDecode<DecodedToken>(token);
       setUserId(decodedToken?.id || "");
     }
   }, []);
 
-  useEffect(() => {
-    const fetchUserType = async () => {
-      if (!userId) {
-        console.error("User ID is not available.");
-        return;
-      }
-
-      try {
-        const response = await axios.post("https://catalysers-finovate-assignment.onrender.com/api/tasks/getusertype", {
-          userId,
-        });
-
-        if (response.status === 200) {
-          const { userType } = response.data;
-          if (userType === "premium") {
-            setIsPremium(true);
-          } else {
-            setIsPremium(false);
-          }
-        } else {
-          console.error("Error:", response.data.error);
-        }
-      } catch (error) {
-        console.error("Error fetching user type:", error);
-      }
+  // Add this function to get the task limit based on plan
+  const getTaskLimit = (userType: string): number => {
+    const limits = {
+      'free': 3,
+      'pro': 10,
+      'premium': 50
     };
+    return limits[userType as keyof typeof limits] || 3;
+  };
 
-    fetchUserType();
+  // Add this before the useEffect
+  const fetchUserPlanInfo = async () => {
+    if (!userId) {
+      console.error("User ID is not available.");
+      return;
+    }
+
+    try {
+      const typeResponse = await axios.post("http://localhost:5000/api/tasks/getusertype", {
+        userId,
+      });
+
+      if (typeResponse.status === 200) {
+        const { userType } = typeResponse.data;
+        
+        const countResponse = await axios.get(`http://localhost:5000/api/tasks/count/${userId}`);
+        const taskCount = countResponse.data.count;
+        
+        setPlanInfo({
+          userType,
+          taskCount,
+          taskLimit: getTaskLimit(userType)
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user plan info:", error);
+    }
+  };
+
+  // Modify the useEffect to just call the function
+  useEffect(() => {
+    fetchUserPlanInfo();
   }, [userId]);
 
   const handleCreateTask = async () => {
     try {
-      if (!isPremium) {
-        alert("Upgrade to premium to create unlimited tasks.");
+      if (!planInfo) {
+        alert("Loading plan information...");
+        return;
+      }
+
+      // Check if user has reached their task limit
+      if (planInfo.taskCount >= planInfo.taskLimit) {
+        alert("You've reached your task limit. Please upgrade your plan to create more tasks.");
         return;
       }
 
@@ -114,12 +168,14 @@ export default function CreateTaskForm() {
       };
 
       const response = await axios.post(
-        "https://catalysers-finovate-assignment.onrender.com/api/tasks",
+        "http://localhost:5000/api/tasks",
         payload
       );
 
       if (response.status === 201) {
         alert("Task created successfully!");
+        // Refresh the plan info after creating a task
+        fetchUserPlanInfo();
       } else {
         alert(response.data.message || "Failed to create task");
       }
@@ -129,41 +185,66 @@ export default function CreateTaskForm() {
     }
   };
 
-  const handlecheckout = async () => {
-    try {
-      const response = await axios.post(
-        "https://catalysers-finovate-assignment.onrender.com/api/tasks/checkout",
-        {
-          items: [
-            {
-              id: 1,
-              quantity: 1,
-              price: 299,
-              name: "Premium Plan",
-            },
-          ],
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          withCredentials: true, // Use this if your API requires cookies or other credentials
-        }
-      );
+  // const handlecheckout = async () => {
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:5000/api/tasks/checkout",
+  //       {
+  //         items: [
+  //           {
+  //             id: 1,
+  //             quantity: 1,
+  //             price: 299,
+  //             name: "Premium Plan",
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         withCredentials: true, // Use this if your API requires cookies or other credentials
+  //       }
+  //     );
 
-      const { url } = response.data;
-      window.location.href = url;
-    } catch (err) {
-      console.error("Error during checkout:", err);
-    }
+  //     const { url } = response.data;
+  //     window.location.href = url;
+  //   } catch (err) {
+  //     console.error("Error during checkout:", err);
+  //   }
+  // };
+
+  const handleCheckoutRedirect = () => {
+    router.push("/Payment");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create a New Task</CardTitle>
         <CardDescription>
-          Assign a task to a user. Upgrade to premium to create unlimited tasks.
+          {planInfo ? (
+            <div className="space-y-2">
+              <p>Current Plan: <span className="font-semibold capitalize">{planInfo.userType}</span></p>
+              <p>Tasks Created: <span className="font-semibold">{planInfo.taskCount}</span> / {planInfo.taskLimit}</p>
+              <p>Tasks Remaining: <span className="font-semibold">{Math.max(0, planInfo.taskLimit - planInfo.taskCount)}</span></p>
+              {planInfo.taskCount >= planInfo.taskLimit && (
+                <p className="text-red-500">
+                  You've reached your task limit. Please upgrade your plan to create more tasks.
+                </p>
+              )}
+            </div>
+          ) : (
+            "Loading plan information..."
+          )}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -205,10 +286,14 @@ export default function CreateTaskForm() {
         </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button type="button" onClick={handlecheckout} disabled={isPremium}>
+        <Button type="button" onClick={handleCheckoutRedirect}>
           Upgrade to Premium
         </Button>
-        <Button type="submit" onClick={handleCreateTask} disabled={!isPremium}>
+        <Button 
+          type="submit" 
+          onClick={handleCreateTask} 
+          disabled={!planInfo || planInfo.taskCount >= planInfo.taskLimit}
+        >
           Create Task
         </Button>
       </CardFooter>

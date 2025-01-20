@@ -1,5 +1,6 @@
 const pool = require('../db.js');
 const Stripe = require("stripe");
+const { producer } = require('../kafka.js');
 
 
 const stripe = new Stripe("sk_test_51OueggSC4tZo71faRJExWCUe7F6GOgvFWbWMhX9colXhHR0J0e8dvzDP5sfZbiaP6zmGaVvmOfNOpVMexiCNRynf00di1dsUpY");
@@ -27,8 +28,8 @@ exports.checkout = async (req, res) => {
       shipping_address_collection: {
         allowed_countries: ["IN"], // Restrict to India or add more countries as needed
       },
-      success_url: "https://catalysers-finovate-assignment.vercel.app/dashboard",
-      cancel_url: "https://catalysers-finovate-assignment.vercel.app/dashboard",
+      success_url: "http://localhost:3000/dashboard",
+      cancel_url: "http://localhost:3000/dashboard",
     });
     res.json({ url: session.url });
   } catch (error) {
@@ -93,16 +94,41 @@ exports.stripeWebhook = async (req, res) => {
 };
 // Create Task
 exports.createTask = async (req, res) => {
-    const { title, description, assigned_to ,created_by} = req.body;
-    try {
-        const result = await pool.query(
-            'INSERT INTO tasks (title, description, assigned_to, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
-            [title, description, assigned_to, created_by]
-        );
-        res.status(201).json({ task: result.rows[0] });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  const { title, description, assigned_to, created_by } = req.body;
+  try {
+    // Get user type and current task count
+    const userTypeResult = await pool.query(
+      'SELECT usertype FROM users WHERE id = $1',
+      [created_by]
+    );
+    
+    const userType = userTypeResult.rows[0].usertype;
+    const taskCount = await exports.getUserTaskCount(created_by);
+
+    // Define limits based on user type
+    const limits = {
+      'free': 3,
+      'pro': 10,
+      'premium': 50
+    };
+
+    const userLimit = limits[userType] || limits.free;
+
+    if (taskCount >= userLimit) {
+      return res.status(403).json({ 
+        error: `You have reached your task limit (${userLimit}) for ${userType} plan. Please upgrade to create more tasks.`
+      });
     }
+
+    const result = await pool.query(
+      'INSERT INTO tasks (title, description, assigned_to, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
+      [title, description, assigned_to, created_by]
+    );
+    
+    res.status(201).json({ task: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // Get Tasks for User
@@ -173,8 +199,26 @@ exports.getTasks = async (req, res) => {
   
 // Update Task Status
 // Update Task Status
+// exports.updateTaskStatus = async (req, res) => {
+//   const { taskId, status } = req.body; // Extract taskId and status from the request body
+
+//   if (!taskId || !status) {
+//     return res.status(400).json({ error: 'Task ID and status are required' });
+//   }
+
+//   try {
+//     const result = await pool.query(
+//       'UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *',
+//       [status, taskId]
+//     );
+//     res.json({ task: result.rows[0] });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 exports.updateTaskStatus = async (req, res) => {
-  const { taskId, status } = req.body; // Extract taskId and status from the request body
+  const { taskId, status } = req.body;
 
   if (!taskId || !status) {
     return res.status(400).json({ error: 'Task ID and status are required' });
@@ -185,11 +229,24 @@ exports.updateTaskStatus = async (req, res) => {
       'UPDATE tasks SET status = $1 WHERE id = $2 RETURNING *',
       [status, taskId]
     );
+
+    // Produce Kafka message for task update
+    const message = {
+      type: 'TASK_UPDATE',
+      payload: result.rows[0]
+    };
+    
+    await producer.send({
+      topic: 'task-updates',
+      messages: [{ value: JSON.stringify(message) }]
+    });
+
     res.json({ task: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.getUserTypeDetails = async (req, res) => {
   try {
@@ -209,5 +266,29 @@ exports.getUserTypeDetails = async (req, res) => {
   } catch (error) {
     console.error('Error fetching user type details:', error.message);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Add this new function to get task count
+exports.getUserTaskCount = async (userId) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) as task_count FROM tasks WHERE created_by = $1',
+      [userId]
+    );
+    return parseInt(result.rows[0].task_count);
+  } catch (err) {
+    throw new Error('Error getting task count: ' + err.message);
+  }
+};
+
+// Add this new endpoint to get task count
+exports.getTaskCount = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const count = await exports.getUserTaskCount(userId);
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

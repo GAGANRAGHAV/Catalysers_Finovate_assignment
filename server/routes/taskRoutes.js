@@ -1,5 +1,5 @@
 const express = require('express');
-const { createTask,checkout ,getUserTypeDetails,getTasks, updateTaskStatus ,getAllTasksForManager} = require('../controllers/taskController');
+const { createTask,getTaskCount,checkout ,getUserTypeDetails,getTasks, updateTaskStatus ,getAllTasksForManager} = require('../controllers/taskController');
 const { authenticate } = require('../middlewares/authMiddleware');
 const { authorize } = require('../middlewares/roleMiddleware');
 
@@ -15,5 +15,6 @@ router.get('/manager', getAllTasksForManager);
 router.put('/',updateTaskStatus);
 router.post('/checkout', checkout);
 router.post('/getusertype', getUserTypeDetails);
+router.get('/count/:userId', getTaskCount);
   
 module.exports = router;

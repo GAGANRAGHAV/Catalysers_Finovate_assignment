@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {jwtDecode} from "jwt-decode";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 interface Task {
   id: string;
@@ -19,10 +21,12 @@ interface CustomJwtPayload {
 }
 
 export default function UserTasks() {
+  const { user, loading: authLoading } = useAuth('User');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(null);
   const [decodedToken, setDecodedToken] = useState<CustomJwtPayload | null>(null);
+  const router = useRouter();
 
   // Load the token and decode it on the client side
   useEffect(() => {
@@ -38,17 +42,27 @@ export default function UserTasks() {
     }
   }, []);
 
-  // Fetch tasks for the logged-in user
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/loginsignup');
+      return;
+    }
+
+    if (user) {
+      fetchTasks();
+    }
+  }, [authLoading, user]);
+
   const fetchTasks = async () => {
     try {
-      if (!decodedToken || !decodedToken.id) {
-        console.error("Decoded token or user ID is missing.");
+      if (!user?.id) {
+        console.error("User ID is not available.");
         setLoading(false);
         return;
       }
-      const userId = decodedToken.id;
+      
       const response = await axios.get(
-        `https://catalysers-finovate-assignment.onrender.com/api/tasks?userId=${userId}`
+        `http://localhost:5000/api/tasks?userId=${user.id}`
       );
       setTasks(response.data.tasks);
       setLoading(false);
@@ -61,7 +75,7 @@ export default function UserTasks() {
   // Update the task's status
   const updateStatus = async (taskId: string, status: string) => {
     try {
-      const response = await axios.put("https://catalysers-finovate-assignment.onrender.com/api/tasks", {
+      const response = await axios.put("http://localhost:5000/api/tasks", {
         taskId,
         status,
       });
@@ -75,12 +89,6 @@ export default function UserTasks() {
       console.error("Error updating task status:", error);
     }
   };
-
-  useEffect(() => {
-    if (decodedToken) {
-      fetchTasks();
-    }
-  }, [decodedToken]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
